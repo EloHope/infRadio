@@ -68,3 +68,6 @@ news broadcasts is being carried out.
 
 While the radio is on, you can switch between news and music by typing CTRL+C.
 Stop the radio altogether by typing CTRL+Z.
+
+infRadio downloads news in English, German, Swedish and Finnish. You
+can select the news broadcasts by editing the "download_news" function in the script.
