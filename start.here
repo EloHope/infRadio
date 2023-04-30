@@ -1,0 +1,70 @@
+#infRadio - news and music ad infinitum
+
+The infRadio.sh script downloads and plays latest radio news. Once a downloaded set of news has been played, 
+a new set will be fetched for you. Between news broadcasts music from your playlist will be played. You select the playlist, and you select the news broadcasts you are interested in.
+
+The script is set to work in Linux bash environment. The framework is based on the funkRadio settings:
+
+First, you need a directory containing two subfolders:
+mkdir -p ~/funkRadio ~/funkRadio/Archive ~/funkRadio/Talk
+
+Then add a blank file that will contain the infRadio script:
+touch ~/funkRadio/infRadio.sh
+
+Copy the infRadio script into that file. Then activate the file by typing
+chmod u+x  ~/funkRadio/infRadio.sh
+
+Finally, make two log files:
+touch ~/funkRadio/Archive/infRadiolog.txt ~/funkRadio/Archive/musicRadiolog.txt
+
+
+You also need to install these packages, if you do not have them already:
+
+vlc (includes cvlc)
+wget
+mpg123
+ffmpeg (includes volumedetect)
+youtube-dl
+bc
+
+The script plays downloaded broadcasts and mp3 music files with the mpg123 program.
+That is why the playlists have to be of the m3u format and consist of a simple list of music files.
+For instance, playlists made by VLC player are not compatible.
+
+
+##Launching infRadio
+
+If you do not happen to have a compatible music playlist, you can make such a playlist by using the funkRadio.sh script.
+
+The infkRadio script can be launched by typing on the terminal
+
+~/funkRadio/infRadio.sh
+
+
+##infRadio Control Panel
+
+The control panel presents the following options:
+
+1 Set timer to switch infRadio off.
+2 Play infRadio - your favorite songs alternating with news.
+3 Play music only while downloading news.
+4 Turn off infRadio - quit the script.
+
+By typing "1" you can set a timer to switch the radio off.
+If you set the timer at, say, 60 minutes, the radio will turn itself
+off smoothly after 60 minutes - as soon as the news broadcast or song playing at the moment
+comes to an end.
+
+After selecting the "1" option you will see the control panel again,
+and then you can select option "2" or "3".
+
+Option "2" turns the radio on and plays songs and news broadcasts
+ad infinitum. New sets of broadcasts are downloaded after existing
+downloads have been played and removed from the ~/funkRadio/Talk
+folder.
+
+If you select "3", music will be played only while downloading of
+news broadcasts is being carried out.
+
+While the radio is on, you can switch between news and music by typing CTRL+C.
+Stop the radio altogether by typing CTRL+Z.
