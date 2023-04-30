@@ -351,10 +351,9 @@ download_news () {
 ( bbc4news_briefing > /dev/null 2>&1 ) &
 ( abcpm > /dev/null 2>&1 ) &
 ( sverigesradio > /dev/null 2>&1 ) &
-( yleppohjanmaa > /dev/null 2>&1 ) &
-( ylepsavo > /dev/null 2>&1 ) &
+# ( yleppohjanmaa > /dev/null 2>&1 ) &
+# ( ylepsavo > /dev/null 2>&1 ) &
 ( yleradiosuomi > /dev/null 2>&1 ) &
-# listen_to_the_radio
 play_random_song
 listen_to_the_radio
 }
