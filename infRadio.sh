@@ -157,7 +157,6 @@ if [ -f ~/funkRadio/Talk/BBC_worldnews2.mp3 ]; then rm ~/funkRadio/Talk/BBC_worl
 
 
 dlf () {
-
 # News from the German public radio Deutschlandfunk.
 modtime_of_old_podcast="$(cat ~/funkRadio/Archive/infRadiolog.txt | grep Dlf_nachrichten.mp3 | tail -1 | cut -d' ' -f2-)"
 # echo "1modtime_of_old_podcast= ${modtime_of_old_podcast}"
@@ -205,11 +204,10 @@ if [ -f ~/funkRadio/Talk/Dlf_nachrichten2.mp3 ]; then rm ~/funkRadio/Talk/Dlf_na
 }
 
 npr () {
-
 # News from the U.S. public radio NPR.
 old_in_seconds="$(cat ~/funkRadio/Archive/infRadiolog.txt | grep Npr_newscast.mp3 | tail -1 | cut -d' ' -f2-)"
 # echo "old_in_seconds= $old_in_seconds"
-if [ "$modtime_of_old_podcast" = "" ]
+if [ "$old_in_seconds" = "" ]
 then
   modtime_of_new_podcast="$(curl --head http://pd.npr.org/anon.npr-mp3/npr/news/newscast.mp3  2>&1 | grep -i Last-Modified)"
   just_modtime_of_new_podcast=${modtime_of_new_podcast/Last-Modified: /}
@@ -220,13 +218,12 @@ then
   echo "Npr_newscast.mp3 ${new_in_seconds}" >> ~/funkRadio/Archive/infRadiolog.txt
 else
   # old_in_seconds="${modtime_of_old_podcast/Npr_newscast.mp3 /}"
-  echo "old_in_seconds= ${old_in_seconds}"
+  # echo "old_in_seconds= ${old_in_seconds}"
   modtime_of_new_podcast="$(curl --head http://pd.npr.org/anon.npr-mp3/npr/news/newscast.mp3  2>&1 | grep -i Last-Modified)"
   just_modtime_of_new_podcast=${modtime_of_new_podcast/Last-Modified: /}
   new_in_seconds="$(date -d "${just_modtime_of_new_podcast}" "+%s")"
   # echo "2new_in_seconds= ${new_in_seconds}"
   #exit
-
   if (( new_in_seconds > old_in_seconds ))
   then
     if [ -f ~/funkRadio/Talk/Npr_newscast.mp3 ]; then rm ~/funkRadio/Talk/Npr_newscast.mp3; fi
@@ -240,30 +237,34 @@ fi
 }
 
 sverigesradio () {
-
 # News from Swedish public radio.
 version_number_of_old_podcast="$(cat ~/funkRadio/Archive/infRadiolog.txt | grep Sr_nyheter.mp3 | tail -1 | cut -d' ' -f2-)"
+# echo "version_number_of_old_podcast= ${version_number_of_old_podcast}"
+version_number_of_old_podcast="${version_number_of_old_podcast//[[:space:]]/}"
+# if [[ "$version_number_of_old_podcast" =~ [^0-9] ]]; then
+#   echo "Version_number_of_old_podcast contains non-numeric characters."
+#   exit
+# fi
 # echo "version_number_of_old_podcast= ${version_number_of_old_podcast}"
 pod_enclosure="$(wget -q -O - https://api.sr.se/api/rss/pod/3795 | grep enclosure | head -1)" > /dev/null 2>&1
 pod_file="$(echo "$pod_enclosure" | grep -oP '(?<=url=").*(?=" length)')" > /dev/null 2>&1
 version_indicator="$(echo "${pod_file=}" | rev | cut -d'/' -f 1 | rev)"
 version_number_of_new_podcast="$(echo "${version_indicator::-4}")"
-rimpsu="$(wget -q -O - https://api.sr.se/api/rss/pod/3795 | grep enclosure | head -1)" > /dev/null 2>&1
-osoite="$(echo "$rimpsu" | grep -oP '(?<=url=").*(?=" length)')" > /dev/null 2>&1
-if [ "$version_of_old_podcast" = "" ]
+stanza="$(wget -q -O - https://api.sr.se/api/rss/pod/3795 | grep enclosure | head -1)" > /dev/null 2>&1
+addr1="$(echo "$stanza" | grep -oP '(?<=url=").*(?=" length)')" > /dev/null 2>&1
+if [ "$version_number_of_old_podcast" = "" ]
 then
   echo "Sr_nyheter.mp3 ${version_number_of_new_podcast}" >> ~/funkRadio/Archive/infRadiolog.txt
   # echo "version_number_of_new_podcast= ${version_number_of_new_podcast}"
-	wget -q -O ~/funkRadio/Talk/Sverigesradio.mp3 "${osoite}" > /dev/null 2>&1
+	wget -q -O ~/funkRadio/Talk/Sverigesradio.mp3 "${addr1}" > /dev/null 2>&1
   # wget -q -O ~/funkRadio/Talk/Sr_nyheter.mp3 "${pod_file}" > /dev/null 2>&1
 else
   if (( version_number_of_new_podcast > version_number_of_old_podcast ))
   then
-		# echo "2 -- version_number_of_new_podcast= ${version_number_of_new_podcast}"
     mv ~/funkRadio/Talk/Sr_nyheter.mp3 ~/funkRadio/Archive/
     # Modify the infRadiolog file:
     # sed -i '/Sr_nyheter.mp3/d' ~/funkRadio/Archive/infRadiolog.txt
-    wget -q -O ~/funkRadio/Talk/Sverigesradio.mp3 "${osoite}" > /dev/null 2>&1
+    wget -q -O ~/funkRadio/Talk/Sverigesradio.mp3 "${addr1}" > /dev/null 2>&1
     # wget -q -O ~/funkRadio/Talk/Sr_nyheter.mp3 "${pod_file}" > /dev/null 2>&1
     echo "Sr_nyheter.mp3 ${version_number_of_new_podcast}" >> ~/funkRadio/Archive/infRadiolog.txt
   fi
@@ -314,21 +315,18 @@ fi
 }
 
 yleppohjanmaa () {
-
 yle_region="YLEppohjanmaa"
 yle_region_rss="https://feeds.yle.fi/areena/v1/series/1-4479456.rss?"
 yle_downloads
 }
 
 ylepsavo () {
-
 yle_region="YLEpsavo"
 yle_region_rss="https://feeds.yle.fi/areena/v1/series/1-4479312.rss?"
 yle_downloads
 }
 
 yleradiosuomi () {
-
 yle_region="YLEfinland"
 yle_region_rss="https://feeds.yle.fi/areena/v1/series/1-1440981.rss?"
 yle_downloads
@@ -354,6 +352,7 @@ download_news () {
 # ( yleppohjanmaa > /dev/null 2>&1 ) &
 # ( ylepsavo > /dev/null 2>&1 ) &
 ( yleradiosuomi > /dev/null 2>&1 ) &
+# listen_to_the_radio
 play_random_song
 listen_to_the_radio
 }
@@ -412,26 +411,6 @@ else
   fi
   listen_to_the_radio
 fi
-
-# clear
-
-# if [ ${#array_of_news_broadcasts[@]} -eq 0 ]
-# then
-#   if [[ "$skip_music" = "Yes" ]]
-#   then
-#     echo "No downloaded broadcasts are available and no music playlist was selected."
-#     exit 0
-#   else
-#   download_news
-#   # Tidying up in various places:
-#   sed -i '/^[[:space:]]*$/d' ~/funkRadio/Archive/musicRadiolog.txt
-#   sed -i '/^[[:space:]]*$/d' ~/funkRadio/Archive/infRadiolog.txt
-#   sed -i -e 's/\r$//' ~/funkRadio/Archive/infRadiolog.txt # Remove dos-style carriage returns.
-#   listen_to_the_radio
-#   fi
-# else
-# sleep 1
-
 
 }
 
@@ -560,7 +539,3 @@ else
 fi
 # fi
 control_panel
-
-# ~/funkRadio/infRadio.sh
-
-# sh -x ~/funkRadio/infRadio.sh 2> /$HOME/Desktop/infradio_error_file2.txt; nano /$HOME/Desktop/infradio_error_file2.txt
