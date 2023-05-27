@@ -206,7 +206,12 @@ if [ -f ~/funkRadio/Talk/Dlf_nachrichten2.mp3 ]; then rm ~/funkRadio/Talk/Dlf_na
 npr () {
 # News from the U.S. public radio NPR.
 old_in_seconds="$(cat ~/funkRadio/Archive/infRadiolog.txt | grep Npr_newscast.mp3 | tail -1 | cut -d' ' -f2-)"
+old_in_seconds="${old_in_seconds//[[:space:]]/}"
 # echo "old_in_seconds= $old_in_seconds"
+  if [[ "$old_in_seconds" =~ [^0-9] ]]; then
+    echo "Version_number_of_old_podcast contains non-numeric characters."
+    # exit
+  fi
 if [ "$old_in_seconds" = "" ]
 then
   modtime_of_new_podcast="$(curl --head http://pd.npr.org/anon.npr-mp3/npr/news/newscast.mp3  2>&1 | grep -i Last-Modified)"
@@ -224,7 +229,8 @@ else
   new_in_seconds="$(date -d "${just_modtime_of_new_podcast}" "+%s")"
   # echo "2new_in_seconds= ${new_in_seconds}"
   #exit
-  if (( new_in_seconds > old_in_seconds ))
+
+  if (( $new_in_seconds > $old_in_seconds ))
   then
     if [ -f ~/funkRadio/Talk/Npr_newscast.mp3 ]; then rm ~/funkRadio/Talk/Npr_newscast.mp3; fi
     # Modify the infRadiolog file:
@@ -235,6 +241,7 @@ else
 fi
 # sed -i '/^[[:space:]]*$/d' ~/funkRadio/Archive/infRadiolog.txt
 }
+
 
 sverigesradio () {
 # News from Swedish public radio.
@@ -256,16 +263,14 @@ if [ "$version_number_of_old_podcast" = "" ]
 then
   echo "Sr_nyheter.mp3 ${version_number_of_new_podcast}" >> ~/funkRadio/Archive/infRadiolog.txt
   # echo "version_number_of_new_podcast= ${version_number_of_new_podcast}"
-	wget -q -O ~/funkRadio/Talk/Sverigesradio.mp3 "${addr1}" > /dev/null 2>&1
-  # wget -q -O ~/funkRadio/Talk/Sr_nyheter.mp3 "${pod_file}" > /dev/null 2>&1
+	wget -q -O ~/funkRadio/Talk/Sr_nyheter.mp3 "${addr1}" > /dev/null 2>&1
 else
   if (( version_number_of_new_podcast > version_number_of_old_podcast ))
   then
     mv ~/funkRadio/Talk/Sr_nyheter.mp3 ~/funkRadio/Archive/
     # Modify the infRadiolog file:
     # sed -i '/Sr_nyheter.mp3/d' ~/funkRadio/Archive/infRadiolog.txt
-    wget -q -O ~/funkRadio/Talk/Sverigesradio.mp3 "${addr1}" > /dev/null 2>&1
-    # wget -q -O ~/funkRadio/Talk/Sr_nyheter.mp3 "${pod_file}" > /dev/null 2>&1
+    wget -q -O ~/funkRadio/Talk/Sr_nyheter.mp3 "${addr1}" > /dev/null 2>&1
     echo "Sr_nyheter.mp3 ${version_number_of_new_podcast}" >> ~/funkRadio/Archive/infRadiolog.txt
   fi
 fi
@@ -352,7 +357,6 @@ download_news () {
 # ( yleppohjanmaa > /dev/null 2>&1 ) &
 # ( ylepsavo > /dev/null 2>&1 ) &
 ( yleradiosuomi > /dev/null 2>&1 ) &
-# listen_to_the_radio
 play_random_song
 listen_to_the_radio
 }
@@ -539,3 +543,5 @@ else
 fi
 # fi
 control_panel
+
+# ~/funkRadio/infRadio.sh
